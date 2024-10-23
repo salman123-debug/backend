@@ -23,7 +23,7 @@ mongoose.connect(Mongo_Url)
 const signupSchema =new mongoose.Schema({
     username:{
         type:String,
-        reuired:true,
+        required:true,
         unique:true,
         lowercase:true
     },
@@ -36,6 +36,14 @@ const signupSchema =new mongoose.Schema({
     passward:{
         type:String,
         required:true
+    },
+    gender:{
+        type:String,
+        required:true
+    },
+    
+    hobbies:{
+        type:[String],
     }
 });
 
@@ -43,9 +51,9 @@ const Signup = mongoose.model("Signup",signupSchema);
 
 app.post("/api/signups",async (req,res)=>{
     try {
-        const {username,email,passward} = req.body;
+        const {username,email,passward,gender,hobbies} = req.body;
 
-        if(!username || !email || !passward){
+        if(!username || !email || !passward  || !gender){
            return res.status(400).json({message:"All field required"});
         }
         //create a new user instance
@@ -53,7 +61,10 @@ app.post("/api/signups",async (req,res)=>{
             {
                 username,
                 email,
-                passward
+                passward,
+                gender,
+               
+                hobbies:hobbies || []
             }
         );
 
@@ -89,10 +100,41 @@ app.post('/api/login',async(req,res)=>{
 
     } catch (error) {
         console.log("error during login",error);
-        res.status(500).json({message:""})
+        res.status(500).json({message:"error creting userr"})
     }
 })
 
+//delete api
+
+app.delete('/api/delete/:id', async (req, res) => {
+    try {
+        console.log(req.params);
+        
+        const { id } = req.params;
+        const deleteuser = await Signup.findByIdAndDelete(id);
+        if (!deleteuser) {
+            return res.status(404).json({ message: "User Not Found" });
+        }
+        res.status(200).json({ message: "User deleted successfully", deletedUser: deleteuser });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting user" });
+    }
+});
+
+
+//get api 
+// app.get('/api/users/active',async(req,res)=>{
+//     try {
+//         const activeusers = await Signup.find({Status:'Active'});
+//         if(activeusers.length===0){
+//             return res.status(400).json({message:'No active users'})
+//         }
+//         res.status(200).json({Signup:activeusers})
+//     } catch (error) {
+//         console.log("getting Error");
+//         res.status(500).json({message:"error"})
+//     }
+// })
 
 const Port = 3006;
 app.listen(Port,()=>{
