@@ -107,8 +107,39 @@ app.delete('/api/delete/:id',async (req,res)=>{
         res.status(500).json({message:'error creatin user'})
     }
 })
+//get api
+
+app.get('/api/register',async(req,res)=>{
+    try {
+        const user = await Register.find();
+        res.status(200).json(user);
+    } catch (error) {
+        console.log("error",error);
+        res.status(500).json({message:"user creating error"})
+    }
+})
+
+//edit api
+
+app.put('/api/edit/:id',async(req,res)=>{
+    try {
+        const {id} = req.params;
+        const updateData = req.body;
+        const updateeduser = await Register.findByIdAndUpdate(id,updateData,{new:true});
+
+        if(!updateeduser){
+            return res.status(404).json({message:"user not found"});
+
+        }
+        res.status(201).json({message:"update successfull",updateeduser:updateeduser})
+      
+    }catch(error){
+        console.log("Error ",error);
+        res.status(500).json({message:"error creating user"})
+    }
+})
 
 const Port = 8000;
 app.listen(Port,()=>{
-    console.log(`aerver is running at port ${Port}`)
+    console.log(`server is running at port ${Port}`)
 })
